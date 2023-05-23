@@ -24,9 +24,7 @@ setup(
         "scipy",
         "sounddevice",
         "pandas",
-        "pydub",
-        "wave",
-        "mutagen"
+        "librosa"
     ],
 
     classifiers=[

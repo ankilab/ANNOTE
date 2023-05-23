@@ -59,7 +59,7 @@ pip install git+https://github.com/ankilab/ANNOTE.git
 ### Build from source
 
 ````    
-git clone git+https://github.com/ankilab/ANNOTE.git
+git clone https://github.com/ankilab/ANNOTE.git
 cd ANNOTE
 pip install -r requirements.txt
 python main.py
