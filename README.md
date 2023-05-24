@@ -65,6 +65,16 @@ pip install -r requirements.txt
 python main.py
 ````
 
+## Loading annotations from .annote
+To save annotations we use the [flammkuchen package](https://github.com/portugueslab/flammkuchen). 
+The saved files can be accessed in the following way:
+    
+````   
+import flammkuchen as fl
+annotations = fl.load('path/to/file.annote')
+print(annotations)
+````
+
 ## Authors
 - René Groh ([rene.groh@fau.de](mailto:rene.groh@fau.de]))
 - A
