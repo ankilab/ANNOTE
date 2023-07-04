@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt6 import QtWidgets, QtGui, QtCore
 import pyqtgraph as pg
 import pandas as pd
 
@@ -32,7 +32,7 @@ class AnnotationsStatisticsWindow(QtWidgets.QWidget):
         self.toggle_plot_button.clicked.connect(self.toggle_plot_button_clicked)
 
         self.plot_label = QtWidgets.QLabel('Length')
-        self.plot_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.plot_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.plot_label.setStyleSheet("background-color: lightblue; color: black")
 
         buttons_layout.addWidget(self.toggle_plot_button)
@@ -50,7 +50,7 @@ class AnnotationsStatisticsWindow(QtWidgets.QWidget):
         self.table.setVerticalHeaderLabels(self.labels[::-1])
         self.table.setColumnCount(1)
         self.table.horizontalHeader().setVisible(False)
-        self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
+        self.table.setEditTriggers(QtWidgets.QTableWidget.EditTrigger.NoEditTriggers)
 
         self.plot = None
         self.reload_graph()

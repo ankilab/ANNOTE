@@ -1,6 +1,6 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtGui import QPalette, QColor
-from PyQt5.QtCore import Qt
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtGui import QPalette, QColor, QShortcut
+from PyQt6.QtCore import Qt
 import sys
 from pathlib import Path
 import flammkuchen as fl
@@ -9,8 +9,8 @@ from datetime import datetime
 from pkg_resources import resource_filename
 
 
-from src import widgets
-from src import helpers
+import widgets
+import helpers
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -36,11 +36,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_file.addAction("Close/Exit", self._close)
 
         self.menu_extras = self.menu.addMenu("&Extras")
-        self.labels_file_action = QtWidgets.QAction("Create/modify labels", self)
+        self.labels_file_action = QtGui.QAction("Create/modify labels", self)
         self.labels_file_action.triggered.connect(self.open_labels_file_window)
         self.menu_extras.addAction(self.labels_file_action)
 
-        self.annotation_statistics_action = QtWidgets.QAction("Annotation Statistics", self)
+        self.annotation_statistics_action = QtGui.QAction("Annotation Statistics", self)
         self.annotation_statistics_action.triggered.connect(self.open_annotation_statistics_window)
         self.annotation_statistics_action.setCheckable(True)
         self.menu_extras.addAction(self.annotation_statistics_action)
@@ -92,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # add player controls widget
             self.player = widgets.PlayerControls(self.data_handler)
-            self.main_layout.addWidget(self.player, 0, 0, 1, 2)
+            self.main_layout.addWidget(self.player, 2, 0, 1, 1)
         else:
             self.player = None
             self.audio_player = None
@@ -100,13 +100,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # add annotate precise widget
         self.annotate_precise_widget = widgets.AnnotatePreciseWidget(self.audio_player, self.data_handler)
-        self.main_layout.addWidget(self.annotate_precise_widget, 1, 0, 1, 2)
+        self.main_layout.addWidget(self.annotate_precise_widget, 0, 0, 2, 3)
+
+        # add annotate buttons widget
+        self.annotate_buttons_widget = widgets.AnnotateButtonsWidget(self.data_handler)
+        if self.data_handler.contains_audio_file():
+            self.main_layout.addWidget(self.annotate_buttons_widget, 3, 0, 1, 1)
+        else:
+            self.main_layout.addWidget(self.annotate_buttons_widget, 2, 0, 2, 1)
 
         # add table widget
         table_widget = widgets.TableWidget(self.audio_player, self.data_handler, self.annotate_precise_widget, self)
         self.data_handler.table_widget = table_widget
-        self.main_layout.addWidget(table_widget, 0, 2, 3, 1)
-        self.main_layout.setAlignment(table_widget, Qt.AlignRight)
+        self.main_layout.addWidget(table_widget, 2, 1, 2, 2)
+        self.main_layout.setAlignment(table_widget, Qt.AlignmentFlag.AlignRight)
 
         # initialize keyboard shortcuts
         self.init_shortcuts()
@@ -253,9 +260,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.save_path = fn
         else:
             reply = QtWidgets.QMessageBox.question(self, 'Save', f'Save to file {Path(self.save_path).name}?',
-                                                   QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                   QtWidgets.QMessageBox.Yes)
-            if reply == QtWidgets.QMessageBox.No:
+                                                   QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+                                                   QtWidgets.QMessageBox.StandardButton.Yes)
+            if reply == QtWidgets.QMessageBox.StandardButton.No:
                 fn = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Annotations',
                                                            directory=str(
                                                                self.directory) + '/' + self.filename if self.directory else self.filename,
@@ -428,9 +435,9 @@ class MainWindow(QtWidgets.QMainWindow):
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle('Saving')
         msg.setText(f'Saved successfully to \n "{path}"')
-        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
         msg.setWindowIcon(QtGui.QIcon(self.logo_path))
-        msg.exec_()
+        msg.exec()
 
     ##################################################################################
     # Helper
@@ -443,9 +450,9 @@ class MainWindow(QtWidgets.QMainWindow):
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle('Error')
         msg.setText(error_msg)
-        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
         msg.setWindowIcon(QtGui.QIcon(self.logo_path))
-        msg.exec_()
+        msg.exec()
 
     def _ask_save(self):
         """
@@ -453,18 +460,18 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         if self.initialized:
             reply = QtWidgets.QMessageBox.question(self, 'Save', 'Do you want to save?',
-                                                   QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel,
-                                                   QtWidgets.QMessageBox.Yes)
-            if reply == QtWidgets.QMessageBox.Yes:
+                                                   QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No | QtWidgets.QMessageBox.StandardButton.Cancel,
+                                                   QtWidgets.QMessageBox.StandardButton.Yes)
+            if reply == QtWidgets.QMessageBox.StandardButton.Yes:
                 return self._save()
-            elif reply == QtWidgets.QMessageBox.Cancel:
+            elif reply == QtWidgets.QMessageBox.StandardButton.Cancel:
                 return False
-            elif reply == QtWidgets.QMessageBox.No:
+            elif reply == QtWidgets.QMessageBox.StandardButton.No:
                 reply = QtWidgets.QMessageBox.question(self, 'Save', 'Are you sure that you want to close without '
                                                                      'saving? (Unsaved content will get lost!)',
-                                                       QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                       QtWidgets.QMessageBox.No)
-                if reply == QtWidgets.QMessageBox.No:
+                                                       QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+                                                       QtWidgets.QMessageBox.StandardButton.No)
+                if reply == QtWidgets.QMessageBox.StandardButton.No:
                     return False
         return True
 
@@ -477,25 +484,25 @@ class MainWindow(QtWidgets.QMainWindow):
         Initializes all shortcuts.
         """
         # Remove all shortcuts
-        for shortcut in self.findChildren(QtWidgets.QShortcut):
+        for shortcut in self.findChildren(QShortcut):
             shortcut.setEnabled(False)
 
         # Add all shortcuts
-        keys_and_functions = [(Qt.Key_Return, self._add_event), (Qt.Key_Left, self._previous_event),
-                              (Qt.Key_Right, self._next_event), (Qt.Key_P, self._play_region),
-                              (Qt.Key_S, self._stop_region), (Qt.Key_Delete, self._delete_row),
-                              (Qt.Key_Backspace, self._delete_row), ("Ctrl+S", self._save)]
+        keys_and_functions = [(Qt.Key.Key_Return, self._add_event), (Qt.Key.Key_Left, self._previous_event),
+                              (Qt.Key.Key_Right, self._next_event), (Qt.Key.Key_P, self._play_region),
+                              (Qt.Key.Key_S, self._stop_region), (Qt.Key.Key_Delete, self._delete_row),
+                              (Qt.Key.Key_Backspace, self._delete_row), ("Ctrl+S", self._save)]
         if self.player is not None:
-            keys_and_functions.append((Qt.Key_Space, self.player.player_buttons_widget.toggle_play))
+            keys_and_functions.append((Qt.Key.Key_Space, self.player.player_buttons_widget.toggle_play))
 
         for (key, function) in keys_and_functions:
-            event = QtWidgets.QShortcut(QtGui.QKeySequence(key), self)
+            event = QShortcut(QtGui.QKeySequence(key), self)
             event.activated.connect(function)
             event.setContext(QtCore.Qt.ShortcutContext.WindowShortcut)
 
         # add shortcuts defined in setup.json to GUI
         for shortcut in self.data_handler.labels['shortcuts']:
-            event = QtWidgets.QShortcut(QtGui.QKeySequence(shortcut), self)
+            event = QShortcut(QtGui.QKeySequence(shortcut), self)
             event.activated.connect(self._add_precise_event)
             event.setContext(QtCore.Qt.ShortcutContext.WindowShortcut)
 
@@ -535,21 +542,21 @@ def set_palette(app_):
     """
     Method uses a Palette to change the whole window style to dark mode.
     """
-    palette = QPalette()
-    palette.setColor(QPalette.Window, QColor(53, 53, 53))
-    palette.setColor(QPalette.WindowText, Qt.white)
-    palette.setColor(QPalette.Base, QColor(25, 25, 25))
-    palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-    palette.setColor(QPalette.ToolTipBase, Qt.black)
-    palette.setColor(QPalette.ToolTipText, Qt.white)
-    palette.setColor(QPalette.Text, Qt.white)
-    palette.setColor(QPalette.Button, QColor(53, 53, 53))
-    palette.setColor(QPalette.ButtonText, Qt.white)
-    palette.setColor(QPalette.BrightText, Qt.red)
-    palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    palette.setColor(QPalette.HighlightedText, Qt.black)
-    app_.setPalette(palette)
+    #palette = QPalette()
+    #palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    #palette.setColor(QPalette.WindowText, Qt.white)
+    #palette.setColor(QPalette.Base, QColor(25, 25, 25))
+    #palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+    #palette.setColor(QPalette.ToolTipBase, Qt.black)
+    #palette.setColor(QPalette.ToolTipText, Qt.white)
+    #palette.setColor(QPalette.Text, Qt.white)
+    #palette.setColor(QPalette.Button, QColor(53, 53, 53))
+    #palette.setColor(QPalette.ButtonText, Qt.white)
+    #palette.setColor(QPalette.BrightText, Qt.red)
+    #palette.setColor(QPalette.Link, QColor(42, 130, 218))
+    #palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    #palette.setColor(QPalette.HighlightedText, Qt.black)
+    #app_.setPalette(palette)
 
 
 def main():
@@ -560,7 +567,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     # Force the style to be the same on all OSs:
     app.setStyle("Fusion")
-    set_palette(app)
+    #set_palette(app)
     gui = MainWindow()
     gui.show()
     exit_code = app.exec()

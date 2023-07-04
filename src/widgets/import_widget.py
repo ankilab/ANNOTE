@@ -1,9 +1,10 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt6 import QtWidgets, QtGui, QtCore
 import os
 import json
 from pathlib import Path
+import glob
 
-from src.helpers.data_loading import load_wav_mp3_file_metadata, load_csv_metadata, load_labels, \
+from helpers.data_loading import load_wav_mp3_file_metadata, load_csv_metadata, load_labels, \
     load_wav_mp3_file, load_csv_file
 
 
@@ -43,7 +44,7 @@ class ImportWindow(QtWidgets.QWidget):
         self.selected_files_layout = QtWidgets.QVBoxLayout()
         self.selected_files_layout.addLayout(self.data_files_layout)
         line = QtWidgets.QFrame()
-        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
         self.selected_files_layout.addWidget(line)
         self.main_layout.addLayout(self.selected_files_layout)
 
@@ -71,16 +72,14 @@ class ImportWindow(QtWidgets.QWidget):
         self.setLayout(self.main_layout)
 
     def _browse_data_file_button_clicked(self):
-        options = QtWidgets.QFileDialog.Options()
-        options |= QtWidgets.QFileDialog.ReadOnly
-        options |= QtWidgets.QFileDialog.ShowDirsOnly
+        dialog = QtWidgets.QFileDialog()
+        dialog.setOptions(QtWidgets.QFileDialog.Option.ReadOnly)
+        dialog.setOptions(QtWidgets.QFileDialog.Option.ShowDirsOnly)
 
-        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                             "Import and load new files",
-                                                             "",
-                                                             "Files (*.wav *.mp3 *.csv)",
-                                                             options=options
-                                                             )
+        file_name, _ = dialog.getOpenFileName(self,
+                                              "Import and load new files",
+                                              "",
+                                              "Files (*.wav *.mp3 *.csv)")
         self.data_file_text_box.setText(file_name)
 
     def _add_data_file_button_clicked(self):
@@ -149,7 +148,7 @@ class ImportWindow(QtWidgets.QWidget):
         layout.addWidget(remove_button, 2, 2)
 
         line = QtWidgets.QFrame()
-        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
         layout.addWidget(line, 3, 0, 1, 3)
 
         self.files_to_load_layouts[remove_button] = {'layout': layout, 'path': str(path), 'combo_box': combo_box}
@@ -180,15 +179,21 @@ class ImportWindow(QtWidgets.QWidget):
             del item
 
     def _browse_labels_file_button_clicked(self):
-        options = QtWidgets.QFileDialog.Options()
-        options |= QtWidgets.QFileDialog.ReadOnly
-        options |= QtWidgets.QFileDialog.ShowDirsOnly
+        dialog = QtWidgets.QFileDialog()
+        dialog.setOptions(QtWidgets.QFileDialog.Option.ReadOnly)
+        dialog.setOptions(QtWidgets.QFileDialog.Option.ShowDirsOnly)
 
-        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                             "Select label file",
-                                                             "",
-                                                             "ANNOTE label file (*.json)",
-                                                             options=options)
+        # Check if we maybe find a labels file in the current directory
+        file_path = None
+        for file in glob.glob("**/*.json"):
+            if "labels" in file:
+                file_path = file
+                #file_path = os.path.join(os.getcwd(), file)
+
+        file_name, _ = dialog.getOpenFileName(self,
+                                              "Select label file",
+                                              "" if file_path is None else file_path,
+                                              "ANNOTE label file (*.json)")
         # Check if the label file is valid
         if file_name == "":
             return
@@ -246,7 +251,7 @@ class ImportWindow(QtWidgets.QWidget):
         msg.setWindowTitle('Error')
         msg.setText(error_msg)
         msg.setIcon(QtWidgets.QMessageBox.Critical)
-        msg.exec_()
+        msg.exec()
 
     def _get_data(self, entry):
         """

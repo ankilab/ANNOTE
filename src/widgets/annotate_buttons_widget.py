@@ -1,5 +1,4 @@
-from PyQt5 import QtWidgets
-import sounddevice as sd
+from PyQt6 import QtWidgets
 
 
 class AnnotateButtonsWidget(QtWidgets.QFrame):
@@ -23,14 +22,6 @@ class AnnotateButtonsWidget(QtWidgets.QFrame):
         previous_event_button = QtWidgets.QPushButton('(<-) - Previous Event')
         previous_event_button.clicked.connect(self.previous_event)
         self.container.addWidget(previous_event_button)
-
-        if self._data_handler.contains_audio_file():
-            play_region_button = QtWidgets.QPushButton('(P) - Play')
-            play_region_button.clicked.connect(self.play_region)
-            stop_region_button = QtWidgets.QPushButton('(S) - Stop')
-            stop_region_button.clicked.connect(self.stop_region)
-            self.container.addWidget(play_region_button)
-            self.container.addWidget(stop_region_button)
 
         next_event_button = QtWidgets.QPushButton('(->) - Next Event')
         next_event_button.clicked.connect(self.next_event)
@@ -81,16 +72,6 @@ class AnnotateButtonsWidget(QtWidgets.QFrame):
             if idx >= len(self.buttons_class_labels):
                 break
         self.classes_buttons_layout.update()
-
-    def play_region(self):
-        """
-        Play the selected region.
-        """
-        self._data_handler.play_selected_region()
-
-    @staticmethod
-    def stop_region():
-        sd.stop()
 
     def next_event(self):
         self._data_handler.select_previous_or_next_event(+1)

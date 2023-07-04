@@ -1,7 +1,8 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt6 import QtWidgets, QtGui, QtCore
 import os
 from pathlib import Path
 from pkg_resources import resource_filename
+from helpers.data_handler import DataHandler
 
 
 class PlayerButtonsWidget(QtWidgets.QWidget):
@@ -14,9 +15,12 @@ class PlayerButtonsWidget(QtWidgets.QWidget):
         """
         super().__init__()
         self.main_layout = QtWidgets.QHBoxLayout()
-        self._data_handler = data_handler
+        self._data_handler: DataHandler = data_handler
+
+        self.last_position = None  # position where the player was before playing a selected region
+
         self._audio_player = self._data_handler.audio_player
-        self._audio_player.stateChanged.connect(self._change_button_icon)
+        self._audio_player.playbackStateChanged.connect(self._change_button_icon)
 
         self.play_icon = QtGui.QIcon(resource_filename(__name__, '../images/play.png'))
         self.stop_icon = QtGui.QIcon(resource_filename(__name__, '../images/stop.png'))
@@ -43,21 +47,58 @@ class PlayerButtonsWidget(QtWidgets.QWidget):
         """
         Event-method for starting/pausing playing the audio through the media player.
         """
-        if self._audio_player.state() == self._audio_player.PlayingState:
+        # check if there is a region selected
+        for _, row in self._data_handler.table_data.iterrows():
+            if row['Selected'] is True:
+                # check if the player is already playing
+                if self._audio_player.playbackState() == self._audio_player.PlaybackState.PlayingState:
+                    self._audio_player.pause()
+                else:
+                    # if there is a region selected, save the position where the player currently is
+                    if self.last_position is None:
+                        self.last_position = self._audio_player.position()
+
+                    # set information of when the player should stop
+                    # as we are playing a selected region, we need to set the end position of the region as the stop
+                    self.parent().current_end_position = row['To']
+
+                    self._audio_player.setPosition(row['From'] * 1000)
+                    self._audio_player.play()
+                self._data_handler.set_regions_movable(False)
+                self._data_handler.set_regions_visible(False)
+                self._data_handler.reload_table()
+                return
+        
+        # The following code is only executed if there is no region selected
+        # So check if there is a previous position saved and set to that position
+        self.set_player_to_last_position()
+
+        # Start or stop playing the audio
+        if self._audio_player.playbackState() == self._audio_player.PlaybackState.PlayingState:
             self._audio_player.pause()
             self._data_handler.set_regions_movable(True)
+            self._data_handler.set_regions_visible(True)
         else:
             self._audio_player.play()
             self._data_handler.set_regions_movable(False)
-        self._data_handler.set_regions_visible()
+        self._data_handler.set_regions_visible(True)
         self._data_handler.table_data.loc[:, 'Selected'] = False
         self._data_handler.reload_table()
+
+    def set_player_to_last_position(self):
+        """ 
+        Method for setting the player to the last position when unselecting a region.
+        """
+        if self.last_position is not None:
+            self._audio_player.setPosition(self.last_position)
+            self.last_position = None
+            self.parent().current_end_position = None
 
     def _change_button_icon(self, state):
         """
         Event-method for changing the start/pause button icon when clicked.
         """
-        if state == self._audio_player.PlayingState:
+        if state == self._audio_player.PlaybackState.PlayingState:
             self.buttons[1].setIcon(self.stop_icon)
         else:
             self.buttons[1].setIcon(self.play_icon)
@@ -71,18 +112,14 @@ class PlayerButtonsWidget(QtWidgets.QWidget):
             self._audio_player.setPosition(new_pos)
         else:
             self._audio_player.setPosition(self._audio_player.duration())
-        self._data_handler.table_data.loc[:, 'Selected'] = False
         self._data_handler.unselect_all()
-        self._data_handler.reload_table()
 
     def backward_five_sec(self):
         """
         Event-method for skipping 5 seconds backward.
         """
         self._audio_player.setPosition(self._audio_player.position() - 5000)
-        self._data_handler.table_data.loc[:, 'Selected'] = False
         self._data_handler.unselect_all()
-        self._data_handler.reload_table()
 
 
 class PlayerBarWidget(QtWidgets.QProgressBar):
@@ -96,6 +133,8 @@ class PlayerBarWidget(QtWidgets.QProgressBar):
         self._audio_player = audio_player
         self._audio_player.positionChanged.connect(self.update_position)
 
+        self.current_end_position = None
+
         self.setTextVisible(False)
         self.setRange(0, 1000)
         self.setFixedHeight(25)
@@ -103,7 +142,7 @@ class PlayerBarWidget(QtWidgets.QProgressBar):
 
         self._init_style_sheet()
 
-    def update_position(self, milliseconds: int):
+    def update_position(self, milliseconds: int) -> None:
         """
         Method for continuously updating the progress bar when using the media player.
         """
@@ -111,25 +150,25 @@ class PlayerBarWidget(QtWidgets.QProgressBar):
             self.setValue((milliseconds / self._audio_player.duration()) * self.maximum())
             duration = int(milliseconds / 1000)
             seconds = str(duration % 60)
-            minutes = str(duration // 60)
+            minutes = str(duration // 60) 
             self.timestamp_updated.emit(minutes.zfill(2) + ':' + seconds.zfill(2))
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         """
         Event-method for updating the progress bar when clicking on it.
         """
         self.dragging = True
-        value = (event.x() / self.width()) * self.maximum()
-        self._audio_player.setPosition((event.x() / self.width()) * self._audio_player.duration())
+        value = (event.position().x() / self.width()) * self.maximum()
+        self._audio_player.setPosition((event.position().x() / self.width()) * self._audio_player.duration())
         self.setValue(value)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         """
         Event-method for updating the progress bar when dragging the mouse.
         """
         if self.dragging:
-            x = event.x()
-            if event.x() > self.width():
+            x = event.position().x()
+            if event.position().x() > self.width():
                 x = self.width()
             value = (x / self.width()) * self.maximum()
             self._audio_player.setPosition((x / self.width()) * self._audio_player.duration())

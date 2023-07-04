@@ -2,14 +2,15 @@ import csv
 
 import numpy as np
 import pandas as pd
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
+from PyQt6.QtMultimedia import QMediaPlayer
 import copy
 import flammkuchen as fl
 from scipy.io.wavfile import write
-import sounddevice as sd
 import os
 import datetime
 import time
+import math
 
 from .region_item import RegionItem
 
@@ -22,10 +23,10 @@ class DataHandler(QtWidgets.QFrame):
         super().__init__()
         self.data = data
         self.labels = labels
-        self.audio_player = None
+        self.audio_player: QMediaPlayer = None
 
-        self.regions = None
-        self.plots = None
+        self.regions: list = None
+        self.plots: list = None
         self.key_currently_selected_audio = None
         self.max_duration = None
 
@@ -230,11 +231,11 @@ class DataHandler(QtWidgets.QFrame):
 
         if min_x == max_x:
             msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
             msg.setText("Error")
             msg.setInformativeText('Please select a region.')
             msg.setWindowTitle("Error")
-            msg.exec_()
+            msg.exec()
             return
 
         regions = []
@@ -275,9 +276,9 @@ class DataHandler(QtWidgets.QFrame):
             if row['Selected'] is True:
                 reply = QtWidgets.QMessageBox.question(self, 'Delete', f'Do you want to delete the selected row? \n '
                                                                        f'Event: {row["Event"]}',
-                                                       QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel,
-                                                       QtWidgets.QMessageBox.Yes)
-                if reply != QtWidgets.QMessageBox.Yes:
+                                                       QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.Cancel,
+                                                       QtWidgets.QMessageBox.StandardButton.Yes)
+                if reply != QtWidgets.QMessageBox.StandardButton.Yes:
                     return
 
                 for plot in self.plots:
@@ -297,31 +298,6 @@ class DataHandler(QtWidgets.QFrame):
         Reloading the GUI table.
         """
         self.table_widget.reload_table()
-
-    def play_selected_region(self):
-        """
-        Method for playing the selected region.
-        """
-        if self.key_currently_selected_audio is None:
-            return
-        elif self.audio_player is not None:
-            if self.audio_player.state() == self.audio_player.PlayingState:
-                return
-
-        min_x, max_x = self.regions[0].getRegion()
-        for index, row in self.table_data.iterrows():
-            if row['Selected'] is True:
-                min_x = row['From']
-                max_x = row['To']
-
-        data = self.data[self.key_currently_selected_audio]['data']
-        sampling_rate = self.data[self.key_currently_selected_audio]['sampling_rate']
-        data_to_play = data[int(min_x * sampling_rate):int(max_x * sampling_rate)]
-        if len(data_to_play) == 0:
-            return
-
-        sd.stop()
-        sd.play(data_to_play, sampling_rate, blocking=False)
 
     def change_selected_region(self):
         """
@@ -377,13 +353,12 @@ class DataHandler(QtWidgets.QFrame):
 
         self.unselect_all()
         self.table_widget.select_row(new_index)
-        sd.stop()
 
     def unselect_all(self):
         """
-        Method for unselecting all events within the table. (I just do it for all entries to keep everything clean)
+        Method for unselecting all events within the table. (I just do it for all entries to keep everything clean.)
         """
-        for index, row in self.table_data.iterrows():
+        for _, row in self.table_data.iterrows():
             for region in row['Regions']:
                 region.setMovable(False)
             self._update_region(row['Regions'])
@@ -403,11 +378,11 @@ class DataHandler(QtWidgets.QFrame):
             region.setVisible(True)
 
     ##################################################################################
-    # Methods to get data for Bar Graph Window
+    # Methods to get data for Statistics Window
     ##################################################################################
     def get_statistics_data(self, labels, flag='length'):
         """
-        Method for getting the data for the bar graph window.
+        Method for getting the data for the statistics window.
         """
         if flag != 'count' and flag != 'length':
             raise ValueError("Parameter 'flag' is not valid.")
@@ -426,14 +401,14 @@ class DataHandler(QtWidgets.QFrame):
 
     def set_regions_movable(self, value):
         """
-        Method for setting the regions movable or not.
+        Method for setting the selection regions movable or not.
         """
         for region in self.regions:
             region.setMovable(value)
 
     def set_regions_visible(self, value=True):
         """
-        Method for setting the regions visible or not.
+        Method for setting the selection regions visible or not.
         """
         for region in self.regions:
             region.setVisible(value)

@@ -1,9 +1,8 @@
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
+from PyQt6.QtMultimedia import QMediaPlayer
 import pyqtgraph as pg
 import numpy as np
-
-from .annotate_buttons_widget import AnnotateButtonsWidget
-
+import math
 
 class AnnotatePreciseWidget(QtWidgets.QFrame):
     """
@@ -12,7 +11,7 @@ class AnnotatePreciseWidget(QtWidgets.QFrame):
     def __init__(self, audio_player, data_handler):
         super().__init__()
         if audio_player is not None:
-            self._audio_player = audio_player
+            self._audio_player: QMediaPlayer = audio_player
             self._audio_player.positionChanged.connect(self.update_region_from_player)
         self.data_handler = data_handler
         self.data_handler.annotate_precise_widget = self
@@ -44,25 +43,22 @@ class AnnotatePreciseWidget(QtWidgets.QFrame):
                 plot.setXLink(self.plots[idx - 1])
 
         # Set size policy
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         self.plot_widget.setSizePolicy(sizePolicy)
         self.main_layout.addWidget(self.plot_widget)
 
-        # region that can be arbitrarily slided by the user
+        # Region that can be arbitrarily slided by the user
         self.regions = []
         for _ in range(len(self.data_handler.data.keys())):
             region = pg.LinearRegionItem()
-            region.setRegion([0, 0.025 * self.max_duration])
-            region.setBrush(pg.mkColor((102, 102, 255, 255)))  # 160, 160, 160
+            region.setRegion([0, self._get_region_size(self.max_duration)])
+            region.setBrush(pg.mkColor((102, 102, 255, 255)))
             region.setHoverBrush(pg.mkColor((102, 102, 255, 255)))
             self.regions.append(region)
 
         for plot, region in zip(self.plots, self.regions):
             plot.addItem(region, ignoreBounds=True)
             region.sigRegionChanged.connect(self.update_regions)
-
-        self.annotate_buttons_widget = AnnotateButtonsWidget(self.data_handler)
-        self.main_layout.addWidget(self.annotate_buttons_widget)
 
         self.setLayout(self.main_layout)
 
@@ -90,7 +86,8 @@ class AnnotatePreciseWidget(QtWidgets.QFrame):
         """
         pos = self._audio_player.position() / 1000
         for region in self.regions:
-            region.setRegion([pos - 0.0025 * self.max_duration, pos + 0.0025 * self.max_duration])
+            region_size = self._get_region_size(self.max_duration)
+            region.setRegion([pos - region_size, pos + region_size])
 
     def update_regions(self):
         """
@@ -111,14 +108,11 @@ class AnnotatePreciseWidget(QtWidgets.QFrame):
             if region != sender_region:
                 region.setRegion([min_x, max_x])
 
-    def play_region(self):
+    def _get_region_size(self, x):
         """
-        Event-method called when the user wants to play the currently selected region.
+        Method for calculating the region size depending on the current x position.
         """
-        self.annotate_buttons_widget.play_region()
-
-    def stop_region(self):
-        """
-        Event-method called when the user wants to stop the audio playback of the currently selected region.
-        """
-        self.annotate_buttons_widget.stop_region()
+        if x <= 1:
+            return 0.3 * (1 - math.exp(-(1 - x)))
+        else:
+            return 0.3 + (0.3 / x)

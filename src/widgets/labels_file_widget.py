@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt6 import QtWidgets, QtGui, QtCore
 import os
 import json
 
@@ -15,7 +15,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
         self.main_window = main_window
 
         self.invalid_shortcuts = ["P", "S"]
-        self.shortcut_regex = QtCore.QRegExp("[A-Z0-9]")
+        self.shortcut_regex = QtCore.QRegularExpression("[A-Z0-9]")
         self.labels_dict = {}
 
         self.init_ui()
@@ -35,7 +35,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
         Initialize the UI.
         """
         self.main_layout = QtWidgets.QVBoxLayout()
-        self.main_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.main_layout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetFixedSize)
 
         # Add layout for file loading
         self.file_path_layout = QtWidgets.QHBoxLayout()
@@ -48,7 +48,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
         self.file_path_layout.addWidget(self.browse_file_button)
         self.main_layout.addLayout(self.file_path_layout)
         line = QtWidgets.QFrame()
-        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
         self.main_layout.addWidget(line)
 
         # Add label/shortcut layout
@@ -62,7 +62,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
         self.shortcut_textbox = QtWidgets.QLineEdit("")
         self.shortcut_textbox.setPlaceholderText("Shortcut (A-Z or 0-9)")
         self.shortcut_textbox.setFixedWidth(150)
-        self.shortcut_textbox.setValidator(QtGui.QRegExpValidator(self.shortcut_regex))
+        self.shortcut_textbox.setValidator(QtGui.QRegularExpressionValidator(self.shortcut_regex))
 
         self.textboxes_layout.addWidget(self.label_textbox)
         self.textboxes_layout.addWidget(self.shortcut_textbox)
@@ -78,8 +78,8 @@ class LabelsFileWindow(QtWidgets.QWidget):
         self.labels_table.setColumnWidth(0, 170)
         self.labels_table.setColumnWidth(1, 100)
         self.labels_table.setHorizontalHeaderLabels(['Label', 'Shortcut'])
-        self.labels_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.labels_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
+        self.labels_table.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.labels_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
 
         self.main_layout.addWidget(self.labels_table)
 
@@ -92,7 +92,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
         # Save to file or apply changes to the main window
         ######################################################################
         line = QtWidgets.QFrame()
-        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
         self.main_layout.addWidget(line)
 
         self.save_apply_layout = QtWidgets.QHBoxLayout()
@@ -117,7 +117,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
         dialog.setDefaultSuffix("json")
         dialog.setNameFilter("ANNOTE label file (*.json)")
 
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+        if dialog.exec():
             selected_file = dialog.selectedFiles()[0]
             self.file_path_text_box.setText(selected_file)
 
@@ -169,7 +169,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
             d['shortcuts'].append(value)
 
         self.main_window.data_handler.labels = d
-        self.main_window.annotate_precise_widget.annotate_buttons_widget.reload_classes_buttons()
+        self.main_window.annotate_buttons_widget.reload_classes_buttons()
         if self.main_window.annotation_statistics_window is not None:
             self.main_window.close_annotation_statistics_window()
             self.main_window.open_annotation_statistics_window()
@@ -183,8 +183,8 @@ class LabelsFileWindow(QtWidgets.QWidget):
             msg = QtWidgets.QMessageBox()
             msg.setWindowTitle('Applying')
             msg.setText("Applying successful.")
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.exec_()
+            msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+            msg.exec()
 
     def reload_table(self):
         """
@@ -222,7 +222,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
 
                 wrong_shortcuts = []
                 for label, shortcut in zip(labels_file["classes"], labels_file["shortcuts"]):
-                    if shortcut in self.invalid_shortcuts or not self.shortcut_regex.exactMatch(shortcut):
+                    if shortcut in self.invalid_shortcuts or not self.shortcut_regex.match(shortcut, 0, QtCore.QRegularExpression.MatchType.NormalMatch):
                         wrong_shortcuts.append(shortcut)
                     self.labels_dict[label] = shortcut
 
@@ -259,7 +259,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
             dialog.setDefaultSuffix("json")
             dialog.setNameFilter("ANNOTE label file (*.json)")
 
-            if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            if dialog.exec() == QtWidgets.QDialog.Accepted:
                 selected_file = dialog.selectedFiles()[0]
                 path = selected_file
 
@@ -274,9 +274,9 @@ class LabelsFileWindow(QtWidgets.QWidget):
                 labels_file = json.load(f)
             if not len(labels_file["classes"]) == 0:
                 reply = QtWidgets.QMessageBox.question(self, 'Save', f'Do you want to override the file at location \n {path}?',
-                                                       QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel,
-                                                       QtWidgets.QMessageBox.Yes)
-                if not reply == QtWidgets.QMessageBox.Yes:
+                                                       QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.Cancel,
+                                                       QtWidgets.QMessageBox.StandardButton.Yes)
+                if not reply == QtWidgets.QMessageBox.StandardButton.Yes:
                     return
 
             d = {'classes': [], 'shortcuts': []}
@@ -290,8 +290,8 @@ class LabelsFileWindow(QtWidgets.QWidget):
             msg = QtWidgets.QMessageBox()
             msg.setWindowTitle('Saving')
             msg.setText("Saving successful.")
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.exec_()
+            msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+            msg.exec()
         else:
             self.show_error_messagebox(f"Labels file path {path} does not exist.")
 
@@ -303,8 +303,8 @@ class LabelsFileWindow(QtWidgets.QWidget):
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle('Error')
         msg.setText(error_msg)
-        msg.setIcon(QtWidgets.QMessageBox.Critical)
-        msg.exec_()
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+        msg.exec()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         """

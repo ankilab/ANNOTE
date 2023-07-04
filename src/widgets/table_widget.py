@@ -1,4 +1,5 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt6 import QtWidgets, QtGui, QtCore
+from PyQt6.QtMultimedia import QMediaPlayer
 import pyqtgraph as pg
 import datetime
 import time
@@ -9,7 +10,7 @@ class TableWidget(QtWidgets.QWidget):
     Class containing everything for displaying annotated events inside a TableWidget.
     """
 
-    def __init__(self, audio_player, data_handler, annotate_precise_widget, main_window):
+    def __init__(self, audio_player: QMediaPlayer, data_handler, annotate_precise_widget, main_window):
         """
         Constructor for TableWidget.
         """
@@ -19,22 +20,25 @@ class TableWidget(QtWidgets.QWidget):
         self.annotate_precise_widget = annotate_precise_widget
         self.main_window = main_window
 
+        self.start_currently_selected_region = None
+        self.stop_currently_selected_region = None
+
         self.main_layout = QtWidgets.QVBoxLayout()
 
         self.table = QtWidgets.QTableWidget()
         self.table.setMinimumWidth(600)
         self.table.setColumnCount(5)
-        self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
+        self.table.setEditTriggers(QtWidgets.QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setHorizontalHeaderLabels([" ", "From", "To", "Event", "Comment"])
         self.table.cellClicked.connect(self.select_row)
-        self.table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         # configure header
         header = self.table.horizontalHeader()
-        header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Fixed)
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
 
         self._data_handler.table_widget = self.table
         self.main_layout.addWidget(self.table)
@@ -56,7 +60,7 @@ class TableWidget(QtWidgets.QWidget):
         Method for selecting a specific row depending on the row index.
         """
         if self._audio_player is not None:
-            if self._audio_player.state() == self._audio_player.PlayingState:
+            if self._audio_player.playbackState() == self._audio_player.PlaybackState.PlayingState:
                 return
 
         df = self._data_handler.table_data
@@ -66,12 +70,20 @@ class TableWidget(QtWidgets.QWidget):
             df.loc[row, 'Selected'] = False
             for region in df.loc[row, 'Regions']:
                 region.setMovable(False)
+            self.start_currently_selected_region = None
+            self.stop_currently_selected_region = None
+
+            # set player to the last position before an event was selected
+            self.main_window.player.player_buttons_widget.set_player_to_last_position()
         else:
             df.loc[row, 'Selected'] = True
             for region in df.loc[row, 'Regions']:
                 region.setMovable(True)
             self._data_handler.set_regions_visible(False)
             self._data_handler.set_regions_movable(False)
+
+            self.start_currently_selected_region = df.loc[row, 'From']
+            self.stop_currently_selected_region = df.loc[row, 'To']
 
         self.reload_table()
 
@@ -108,8 +120,8 @@ class TableWidget(QtWidgets.QWidget):
             checkbox = QtWidgets.QTableWidgetItem()
             self.table.setItem(i, 0, checkbox)
 
-            seconds_from = str(datetime.timedelta(seconds=row["From"]))
-            seconds_to = str(datetime.timedelta(seconds=row["To"]))
+            seconds_from = str(datetime.timedelta(seconds=row["From"]))[:-4]
+            seconds_to = str(datetime.timedelta(seconds=row["To"]))[:-4]
 
             item = QtWidgets.QTableWidgetItem(seconds_from)
             item.setForeground(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
@@ -136,7 +148,8 @@ class TableWidget(QtWidgets.QWidget):
             else:
                 self.table.item(i, 0).setBackground(QtGui.QColor(255, 255, 255))
 
-            # add current information to each region item
+            # add current information to each region item because it is needed 
+            # to let the region item identify on its own that it was selected
             for region in row['Regions']:
                 region.table_data = self._data_handler.table_data
                 region.table_widget = self

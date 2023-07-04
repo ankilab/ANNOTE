@@ -22,7 +22,6 @@ setup(
         "flammkuchen",
         "pyqt5",
         "scipy",
-        "sounddevice",
         "pandas",
         "librosa"
     ],
