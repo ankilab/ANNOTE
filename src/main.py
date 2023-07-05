@@ -9,8 +9,8 @@ from datetime import datetime
 from pkg_resources import resource_filename
 
 
-import widgets
-import helpers
+from src import widgets
+from src import helpers
 
 
 class MainWindow(QtWidgets.QMainWindow):

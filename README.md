@@ -77,9 +77,8 @@ print(annotations)
 
 ## Authors
 - René Groh ([rene.groh@fau.de](mailto:rene.groh@fau.de]))
-- A
-- B
-- Nicole Y.K. Li-Jessen
+- Jie Yu Li
+- Nicole Y. K. Li-Jessen
 - Andreas M. Kist 
 
 ## License
