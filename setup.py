@@ -18,12 +18,12 @@ setup(
     package_data={'': ['images/*.png']},
     install_requires=[
         "pyqtgraph>=0.10.0",
-        "numpy",
-        "flammkuchen",
-        "pyqt5",
-        "scipy",
-        "pandas",
-        "librosa"
+        "numpy>=1.23.5",
+        "flammkuchen>=1.0.2",
+        "pyqt6>=6.5.1",
+        "scipy>=1.10.1",
+        "pandas>=2.0.3",
+        "librosa>=0.10.0"
     ],
 
     classifiers=[
