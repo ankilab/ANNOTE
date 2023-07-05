@@ -538,25 +538,25 @@ def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
 
 
-def set_palette(app_):
+def init_style(app):
     """
     Method uses a Palette to change the whole window style to dark mode.
     """
-    #palette = QPalette()
-    #palette.setColor(QPalette.Window, QColor(53, 53, 53))
-    #palette.setColor(QPalette.WindowText, Qt.white)
-    #palette.setColor(QPalette.Base, QColor(25, 25, 25))
-    #palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-    #palette.setColor(QPalette.ToolTipBase, Qt.black)
-    #palette.setColor(QPalette.ToolTipText, Qt.white)
-    #palette.setColor(QPalette.Text, Qt.white)
-    #palette.setColor(QPalette.Button, QColor(53, 53, 53))
-    #palette.setColor(QPalette.ButtonText, Qt.white)
-    #palette.setColor(QPalette.BrightText, Qt.red)
-    #palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    #palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    #palette.setColor(QPalette.HighlightedText, Qt.black)
-    #app_.setPalette(palette)
+    palette = QPalette()
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Window, QColor(53, 53, 53))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.WindowText, QColor(255, 255, 255))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Base, QColor(25, 25, 25))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.AlternateBase, QColor(53, 53, 53))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.ToolTipBase, QColor(0, 0, 0))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.ToolTipText, QColor(255, 255, 255))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Text, QColor(255, 255, 255))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Button, QColor(53, 53, 53))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.ButtonText, QColor(255, 255, 255))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.BrightText, QColor(255, 0, 0))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Link, QColor(42, 130, 218))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.HighlightedText, QColor(0, 0, 0))
+    app.setPalette(palette)
 
 
 def main():
@@ -567,7 +567,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     # Force the style to be the same on all OSs:
     app.setStyle("Fusion")
-    #set_palette(app)
+    init_style(app)
     gui = MainWindow()
     gui.show()
     exit_code = app.exec()
