@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import glob
 
-from helpers.data_loading import load_wav_mp3_file_metadata, load_csv_metadata, load_labels, \
+from src.helpers.data_loading import load_wav_mp3_file_metadata, load_csv_metadata, load_labels, \
     load_wav_mp3_file, load_csv_file
 
 

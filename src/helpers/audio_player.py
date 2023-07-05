@@ -1,6 +1,5 @@
-from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput #, QMediaContent #, QMediaPlaylist
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6 import QtCore
-import numpy as np
 
 
 class AudioPlayer(QMediaPlayer):

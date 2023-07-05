@@ -1,8 +1,8 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtMultimedia import QMediaPlayer
 import pyqtgraph as pg
-import numpy as np
 import math
+
 
 class AnnotatePreciseWidget(QtWidgets.QFrame):
     """
