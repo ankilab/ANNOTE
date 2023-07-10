@@ -489,8 +489,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Add all shortcuts
         keys_and_functions = [(Qt.Key.Key_Return, self._add_event), (Qt.Key.Key_Left, self._previous_event),
-                              (Qt.Key.Key_Right, self._next_event), (Qt.Key.Key_P, self._play_region),
-                              (Qt.Key.Key_S, self._stop_region), (Qt.Key.Key_Delete, self._delete_row),
+                              (Qt.Key.Key_Right, self._next_event), (Qt.Key.Key_Delete, self._delete_row),
                               (Qt.Key.Key_Backspace, self._delete_row), ("Ctrl+S", self._save)]
         if self.player is not None:
             keys_and_functions.append((Qt.Key.Key_Space, self.player.player_buttons_widget.toggle_play))
@@ -511,12 +510,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _delete_row(self):
         self.data_handler.delete_selected_row()
-
-    def _play_region(self):
-        self.annotate_precise_widget.play_region()
-
-    def _stop_region(self):
-        self.annotate_precise_widget.stop_region()
 
     def _previous_event(self):
         self.data_handler.select_previous_or_next_event(-1)

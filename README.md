@@ -27,26 +27,14 @@ where we demonstrate the use of ANNOTE.
 
 
 # Contents
-- [Quick Start](#quick-start)
 - [Getting started](#getting-started)
 - [Authors](#authors)
 - [License](#license)
 - [Citation](#citation)
 
-## Quick Start
-To get started with ANNOTE straight away, you can download 
-the folder from [Google Drive](tbd). 
-The folder contains the following files:
-
-- annote.exe (Windows)
-- ffmpeg.exe (Windows)
-- annote_intel.app (MacOS)
-- annote_m1_m2.app (MacOS)
-
 
 ## Getting started
 We provide:
-- a demo video on [YouTube](https://www.youtube.com/watch?v=)
 - an example for a [labels file](labels_file_example.json)
 
 
@@ -97,7 +85,7 @@ If you use ANNOTE in your research, please cite our paper:
     issn = {},
     doi = {},
     url = {},
-    author = {Groh, René; Kist, Andreas M.},
+    author = {Groh, René; Li, Jiu Yu; Li-Jessen, Nicole Y. K.; Kist, Andreas M.},
     keywords = {}
 }
 ```
