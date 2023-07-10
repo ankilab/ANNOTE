@@ -2,6 +2,7 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 
 from .player_widgets import PlayerButtonsWidget, PlayerBarWidget
+from src.helpers.audio_player import AudioPlayer
 
 
 class PlayerControls(QtWidgets.QFrame):
@@ -14,11 +15,12 @@ class PlayerControls(QtWidgets.QFrame):
         """
         super().__init__()
         self._data_handler = data_handler
-        self._audio_player = self._data_handler.audio_player
+        self._audio_player: AudioPlayer = self._data_handler.audio_player
         self._audio_player.positionChanged.connect(self.check_selected_region_continue_playing)
         self._init_ui()
 
         self._audio_player.durationChanged.connect(self.change_file)
+        self.change_file()
         self.file_to_play_combo_box.setCurrentIndex(0)
 
         # variable to store the current end position of a selected region
@@ -116,7 +118,6 @@ class PlayerControls(QtWidgets.QFrame):
                         self._audio_player.set_new_data(self._data_handler.data[key])
                     except Exception as e:
                         raise RuntimeError(str(e))
-
 
     def check_selected_region_continue_playing(self, position: int):
         """
