@@ -250,7 +250,7 @@ class ImportWindow(QtWidgets.QWidget):
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle('Error')
         msg.setText(error_msg)
-        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
         msg.exec()
 
     def _get_data(self, entry):

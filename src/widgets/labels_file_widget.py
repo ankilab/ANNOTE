@@ -259,7 +259,7 @@ class LabelsFileWindow(QtWidgets.QWidget):
             dialog.setDefaultSuffix("json")
             dialog.setNameFilter("ANNOTE label file (*.json)")
 
-            if dialog.exec() == QtWidgets.QDialog.Accepted:
+            if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
                 selected_file = dialog.selectedFiles()[0]
                 path = selected_file
 
@@ -294,7 +294,6 @@ class LabelsFileWindow(QtWidgets.QWidget):
             msg.exec()
         else:
             self.show_error_messagebox(f"Labels file path {path} does not exist.")
-
 
     def show_error_messagebox(self, error_msg):
         """

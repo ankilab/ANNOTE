@@ -63,6 +63,11 @@ annotations = fl.load('path/to/file.annote')
 print(annotations)
 ````
 
+## Troubleshooting common issues
+- Using Ubuntu: If you get an error message like `qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.` 
+  you can try to install the following `sudo apt install libxcb-cursor0`.
+
+
 ## Authors
 - René Groh ([rene.groh@fau.de](mailto:rene.groh@fau.de]))
 - Jie Yu Li
