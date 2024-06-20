@@ -37,6 +37,9 @@ where we demonstrate the use of ANNOTE.
 We provide:
 - an example for a [labels file](labels_file_example.json)
 
+## Requirements
+To use ANNOTE, you need to have Python 3.8  on your system. It was only tested on this Python version.
+
 
 ### Install with pip
 
@@ -50,6 +53,7 @@ pip install git+https://github.com/ankilab/ANNOTE.git
 git clone https://github.com/ankilab/ANNOTE.git
 cd ANNOTE
 pip install -r requirements.txt
+cd src
 python main.py
 ````
 
