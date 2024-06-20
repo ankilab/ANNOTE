@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from pkg_resources import resource_filename
 
-
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src import widgets
 from src import helpers
 
