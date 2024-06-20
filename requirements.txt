@@ -1,4 +1,3 @@
-annote @ git+https://github.com/ankilab/ANNOTE.git@88db132eb36954ed8534fde4d730a726008d9cfa
 anyio==3.6.2
 appdirs==1.4.4
 argon2-cffi==21.3.0
