@@ -38,7 +38,7 @@ We provide:
 - an example for a [labels file](labels_file_example.json)
 
 ## Requirements
-To use ANNOTE, you need to have Python 3.8  on your system. It was only tested on this Python version.
+To use ANNOTE, you need to have Python 3.8.10  on your system. It was only tested on this Python version.
 
 
 ### Install with pip
@@ -85,17 +85,14 @@ The project is licensed under the MIT License. See the [LICENSE](LICENSE) file f
 If you use ANNOTE in your research, please cite our paper:
 
 ```
-@article{,
-    title = {ANNOTE: Annotation of Time-series Events},
-    journal = {},
-    volume = {},
-    pages = {},
-    year = {2023},
-    issn = {},
-    doi = {},
-    url = {},
-    author = {Groh, René; Li, Jiu Yu; Li-Jessen, Nicole Y. K.; Kist, Andreas M.},
-    keywords = {}
+@article{groh2024annote,
+  title={ANNOTE: Annotation of time-series events},
+  author={Groh, Ren{\'e} and Li, Jie Yu and Li-Jessen, Nicole YK and Kist, Andreas M},
+  journal={Software Impacts},
+  volume={21},
+  pages={100679},
+  year={2024},
+  publisher={Elsevier}
 }
 ```
 
