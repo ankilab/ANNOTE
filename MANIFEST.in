@@ -1,2 +1,2 @@
-include AIrway_GUI/setup.json
-include AIrway_GUI/images/*
+include labels_file_example.json
+include src/images/*
