@@ -34,7 +34,7 @@ Source = "https://github.com/rgroh1996/ANNOTE"
 Tracker = "https://github.com/rgroh1996/ANNOTE/issues"
 
 [project.gui-scripts]
-annote = "src.main:main"
+annote = "annote.main:main"
 
 # [tool.setuptools.package-dir]
 # mypkg = "lib"

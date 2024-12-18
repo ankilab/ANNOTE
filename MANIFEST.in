@@ -1,2 +1,2 @@
-include labels_file_example.json
-include src/images/*
+include src/annote/labels_file_example.json
+include src/annote/images/*
