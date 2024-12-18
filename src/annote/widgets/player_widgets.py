@@ -2,7 +2,7 @@ from PyQt6 import QtWidgets, QtGui, QtCore
 import os
 from pathlib import Path
 from pkg_resources import resource_filename
-from src.helpers.data_handler import DataHandler
+from ..helpers.data_handler import DataHandler
 
 
 class PlayerButtonsWidget(QtWidgets.QWidget):

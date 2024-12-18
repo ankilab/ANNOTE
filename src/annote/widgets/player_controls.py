@@ -2,7 +2,7 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 
 from .player_widgets import PlayerButtonsWidget, PlayerBarWidget
-from src.helpers.audio_player import AudioPlayer
+from ..helpers.audio_player import AudioPlayer
 
 
 class PlayerControls(QtWidgets.QFrame):
