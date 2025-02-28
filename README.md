@@ -21,10 +21,6 @@ applications that rely on annotated time-series data.
 - Annotate start and end points of events
 - Dynamic label adjustments
 
-# Demo
-For a demo you can watch our youtube video 
-where we demonstrate the use of ANNOTE.
-
 
 # Contents
 - [Getting started](#getting-started)
