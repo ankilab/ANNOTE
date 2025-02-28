@@ -35,7 +35,7 @@ where we demonstrate the use of ANNOTE.
 
 ## Getting started
 We provide:
-- an example for a [labels file](labels_file_example.json)
+- an example for a [labels file](src/annote/labels_file_example.json)
 
 ## Requirements
 To use ANNOTE, you need to have Python 3.8.10  on your system. It was only tested on this Python version.
@@ -47,14 +47,13 @@ To use ANNOTE, you need to have Python 3.8.10  on your system. It was only teste
 pip install git+https://github.com/ankilab/ANNOTE.git
 ````
 
-### Build from source
+or
 
 ````    
 git clone https://github.com/ankilab/ANNOTE.git
 cd ANNOTE
-pip install -r requirements.txt
-cd src
-python main.py
+pip install .
+annote
 ````
 
 ## Loading annotations from .annote
