@@ -65,16 +65,27 @@ class AnnotatePreciseWidget(QtWidgets.QFrame):
         for plot, key in zip(self.plots, self.data_handler.data.keys()):
             t = self.data_handler.data[key]['t']
             data = self.data_handler.data[key]['data']
+            x_labels = list(self.data_handler.data[key].get('t_labels', None))
+            
+            if x_labels is not None:
+                x_labels = x_labels[::100]
+                t_copy = t.copy()[::100]
+                for label, x in zip(x_labels, t_copy):
+                    text_item = pg.TextItem(text=str(label), anchor=(0.5, 1.0))
+                    plot.addItem(text_item)
+                    text_item.setPos(x, - max(data))
+            else:
+                plot.hideAxis('bottom')
 
             plot.plot(t, data, pen=(255, 153, 0))
             plot.setXRange(0, self.max_duration)
             range_ = plot.getViewBox().viewRange()
             plot.getViewBox().setLimits(xMin=range_[0][0], xMax=range_[0][1],
-                                        yMin=range_[1][0], yMax=range_[1][1])
+                        yMin=range_[1][0], yMax=range_[1][1])
             plot.setDownsampling(True, True)
             plot.setClipToView(True)
             plot.hideAxis('left')
-            plot.hideAxis('bottom')
+                
 
         self.data_handler.regions = self.regions
         self.data_handler.plots = self.plots

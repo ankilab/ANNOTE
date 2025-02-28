@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 import pandas as pd
 import json
+import re
 
 from .calculate_md5_hash import get_md5_hash
 
@@ -49,6 +50,13 @@ def load_csv_file(path, t_column_name, data_column_name):
     # Load selected time axis column from csv
     try:
         df = pd.read_csv(path, usecols=[t_column_name])
+
+        df[t_column_name] = pd.to_datetime(df[t_column_name], errors='coerce')
+        
+        if df[t_column_name].notna().all():
+            d['t_labels'] = df[t_column_name].copy()
+            df[t_column_name] = (df[t_column_name] - df[t_column_name].iloc[0]).dt.total_seconds()
+
         d['t'] = df[t_column_name].dropna().to_numpy()
 
         # Load selected data column from csv
@@ -57,7 +65,7 @@ def load_csv_file(path, t_column_name, data_column_name):
     except Exception as e:
         raise RuntimeError(f"Can't load the file {path}: str({e})")
 
-    d['duration'] = d['t'][-1]
+    d['duration'] = duration = d['t'][-1]
     d['hash'] = get_md5_hash(path)
     return d
 
